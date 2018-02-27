@@ -1,6 +1,6 @@
 from builtins import range
 import numpy as np
-
+import math
 
 def affine_forward(x, w, b):
     """
@@ -202,7 +202,20 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # variance, storing your result in the running_mean and running_var   #
         # variables.                                                          #
         #######################################################################
-        pass
+        out = np.zeros((N,D))
+        
+        sample_mean = np.mean(x,axis=0)
+        sample_var = np.var(x,axis=0)
+        norm_out = (x - sample_mean) / (np.sqrt(sample_var)+ eps)
+        
+        out = norm_out*gamma + beta
+        
+        running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+        running_var = momentum * running_var + (1 - momentum) * sample_var
+        
+        
+        
+        #pass
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -213,7 +226,13 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # then scale and shift the normalized data using gamma and beta.      #
         # Store the result in the out variable.                               #
         #######################################################################
-        pass
+        
+          norm_out = (x - running_mean) / (np.sqrt(running_var)+ eps)
+        
+          out = norm_out*gamma + beta
+        
+        
+        #pass
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
@@ -223,6 +242,9 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     # Store the updated running means back into bn_param
     bn_param['running_mean'] = running_mean
     bn_param['running_var'] = running_var
+    
+    
+    cache = (x,norm_out,bn_param,gamma,beta)
 
     return out, cache
 
@@ -249,7 +271,20 @@ def batchnorm_backward(dout, cache):
     # TODO: Implement the backward pass for batch normalization. Store the    #
     # results in the dx, dgamma, and dbeta variables.                         #
     ###########################################################################
-    pass
+   
+    
+    x,norm_out,bn_param,gamma,beta = cache
+    dtemp = norm_out*dout
+    dgamma = np.sum(dtemp,axis=0)
+    dbeta = np.sum(dout,axis=0)
+    eps = bn_param.get('eps', 1e-5)
+    sample_var = np.var(x,axis=0)
+    dx = (dout*gamma) / (np.sqrt(sample_var)+ eps)
+    print(gamma.shape)
+    print(dout.shape)
+    
+    
+    #pass
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -536,7 +571,25 @@ def max_pool_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the max pooling backward pass                           #
     ###########################################################################
-    pass
+    x , pool_param = cache
+    N,C,H,W = x.shape
+    dx = np.zeros((N,C,H,W))
+    PH = pool_param['pool_height']
+    PW = pool_param['pool_width']
+    stride = pool_param['stride']
+    H1 = 1 + (H - PH) / stride
+    W1 = 1 + (W - PW) / stride
+    H1 = int(H1)
+    W1 = int(W1)
+    
+    for i in range(N):
+        for j in range(C):
+            for k in range(H1):
+                for l in range(W1):
+                    dx[i,j,p:PH+p,]
+    
+    
+    #pass
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
