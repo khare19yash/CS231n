@@ -47,7 +47,14 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W1' and 'b1' and second layer weights #
         # and biases using the keys 'W2' and 'b2'.                                 #
         ############################################################################
-        pass
+        #pass
+        
+        W1 = weight_scale * np.random.randn(input_dim,hidden_dim)
+        b1 = np.zeros((1,hidden_dim))
+        W2 = weight_scale * np.random.randn(hidden_dim,num_classes)
+        b2 = np.zeros((1,num_classes))
+       
+        self.params = {'W1':W1,'b1':b1,'W2':W2,'b2':b2}
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -77,12 +84,27 @@ class TwoLayerNet(object):
         # TODO: Implement the forward pass for the two-layer net, computing the    #
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
-        pass
+        #pass
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
 
         # If y is None then we are in test mode so just return scores
+        
+        
+        W1 = self.params['W1']
+        W2 = self.params['W2']
+        b1 = self.params['b1']
+        b2 = self.params['b2']
+        
+     
+        
+        hidden_layer = np.maximum(0,np.dot(X,W1)+b1)
+        scores = np.dot(hidden_layer,W2) + b2
+        #scores = np.exp(y_)
+        #scores = scores / np.sum(scores,axis=1,keepdims=True)
+        #print(y_)
+        
         if y is None:
             return scores
 
@@ -97,7 +119,54 @@ class TwoLayerNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        pass
+        
+        
+        '''
+        data_loss = -np.log(scores[range(X.shape[0]),y])
+        data_loss = np.sum(data_loss) / X.shape[0]
+        reg_loss = 0.5*self.reg*np.sum(W1*W1) + 0.5*self.reg*np.sum(W2*W2)
+        loss = data_loss + reg_loss
+        '''
+        
+        data_loss , dscores = softmax_loss(scores,y)
+        reg_loss = 0.5*self.reg*np.sum(W1*W1) + 0.5*self.reg*np.sum(W2*W2)
+        loss = data_loss + reg_loss
+        
+        #dy_ = scores 
+        #dy_ -= 1
+        #dy_ /= X.shape[0]
+        dW2 = np.dot(hidden_layer.T,dscores) + self.reg*W2
+        dhidden_layer = np.dot(dscores,W2.T)
+        dhidden_layer[hidden_layer <= 0] = 0
+        dW1 = np.dot(X.T,dhidden_layer) + self.reg*W1
+        db2 = np.sum(dscores,axis=0)
+        db1 = np.sum(dhidden_layer,axis=0)
+        
+        
+        grads = {'W1':dW1,'b1':db1,'W2':dW2,'b2':db2}
+        
+        '''
+        data_loss, dscores = softmax_loss(scores, y)
+        reg_loss = 0.5 * self.reg * np.sum(W1**2)
+        reg_loss += 0.5 * self.reg * np.sum(W2**2)
+        loss = data_loss + reg_loss
+
+        # Backpropagaton
+        grads = {}
+        # Backprop into second layer
+        dx1, dW2, db2 = affine_backward(dscores, cache_scores)
+        dW2 += self.reg * W2
+
+        # Backprop into first layer
+        dx, dW1, db1 = affine_relu_backward(
+            dx1, cache_hidden_layer)
+        dW1 += self.reg * W1
+        
+        grads = {'W1':dW1,'b1':db1,'W2':dW2,'b2':db2}
+        '''
+        
+        
+        #pass
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
