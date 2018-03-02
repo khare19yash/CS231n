@@ -498,13 +498,12 @@ def conv_backward_naive(dout, cache):
                 p = k*stride
                 for l in range(W1):
                     q = l*stride
-                    dx[i,:,p:HH+p,q:WW+q] += w[j,:,:,:]
+                    dx[i,:,p:HH+p,q:WW+q] = w[j,:,:,:]*dout[i,j,k,l]
+                    dw[j,:,:,:] += x[i,:,p:HH+p,q:WW+q]*dout[i,j,k,l] 
+                    db[j] +=dout[i,j,k,l]
                    
                 
-    
-      
-    print(dout.shape)
-    dx = dx[:,:,1:6,1:6]
+                            
     #pass
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -585,8 +584,23 @@ def max_pool_backward_naive(dout, cache):
     for i in range(N):
         for j in range(C):
             for k in range(H1):
+                p = stride*k
                 for l in range(W1):
-                    dx[i,j,p:PH+p,]
+                    q = stride*l
+                    z = np.argmax(x[i,j,p:PH+p,q:PW+q])
+                    m = int(z/PW)
+                    n = z%PW
+                    dx[i,j,m+p,n+q] = 1
+                    
+    for i in range(N):
+        for j in range(C):
+            for k in range(H1):
+                p = stride*k
+                for l in range(W1):
+                    q = stride*l
+                    dx[i,j,p:PH+p,q:PW+q] *= dout[i,j,k,l]
+                    
+    
     
     
     #pass
@@ -627,6 +641,16 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     # version of batch normalization defined above. Your implementation should#
     # be very short; ours is less than five lines.                            #
     ###########################################################################
+    
+    N,C,H,W = x.shape
+    out = np.zeros((x.shape))
+     
+    for i in range(N):
+        for j in range(C):
+            out[i,j,:,:],cache1 = batchnorm_forward(x[i,j,:,:],gamma[j],beta[j],bn_param)
+            cache = cache + cache1
+            
+    
     pass
     ###########################################################################
     #                             END OF YOUR CODE                            #

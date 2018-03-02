@@ -420,12 +420,29 @@ class FullyConnectedNet(object):
             reg_loss += 0.5*self.reg*np.sum(self.params[W]**2)
         loss = data_loss + reg_loss
         
-        
+        dW = {}
+        db = {}
+        dout = {}
+        W = 'W'
+        W +=str(L-1)
+        b +=str(L-1)
+        print(dscores.shape)
+        print(Input[L-1].shape)
+        dW[W] = np.dot(Input[L-1].T,dscores)
+        db[b] = np.sum(dscores,axis=0)
+        dout[L-1] = np.dot(dscores,self.params[W].T)
+       
         for i in range(L-1):
             out = out_dict[L-2-i]
+            if self.use_batch_norm:
+                if self.use_dropout:
+                    mask = np.random.rand(*out[2]) < self.dropout_param['p']
+                    cache = self.dropout_param
+                    dh = dropout_backward(dout[L-1-i],cache)
+                    dh = relu_backward(dh,out[1])
+                    
             
-            
-            
+          
         
         
         #pass
