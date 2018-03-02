@@ -232,7 +232,49 @@ class FullyConnectedNet(object):
         # beta2, etc. Scale parameters should be initialized to one and shift      #
         # parameters should be initialized to zero.                                #
         ############################################################################
-        pass
+        
+        
+        dim_list = []
+        dim_list.append(input_dim)
+        for i in range(len(hidden_dims)):
+            dim_list.append(hidden_dims[i])
+        W = 'W'
+        b = 'b'
+        gamma = 'gamma'
+        beta = 'beta'
+            
+        
+        for i in range(self.num_layers-1):
+            w = weight_scale*np.random.randn(dim_list[i],dim_list[i+1])
+            W+=str(i)
+            self.params[W] = w
+            b1 = np.zeros((1,dim_list[i+1]))
+            b+=str(i)
+            self.params[b] = b1
+            gamma1 = np.ones(dim_list[i+1])
+            gamma+=str(i)
+            self.params[gamma] = gamma1
+            beta1 = np.zeros(dim_list[i+1])
+            beta+=str(i)
+            self.params[beta] = beta1     
+            W = 'W'
+            b = 'b'
+            gamma = 'gamma'
+            beta = 'beta'
+            
+            
+        W = 'W'
+        b = 'b'
+        
+        w = weight_scale*np.random.randn(dim_list[i+1],num_classes)
+        W+=str(2)
+        self.params[W] = w
+        b1 = np.zeros((1,num_classes))
+        b+=str(2)
+        self.params[b] = b1
+        
+            
+        #pass
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -290,11 +332,67 @@ class FullyConnectedNet(object):
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
         ############################################################################
-        pass
+        #pass
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
-
+        
+        W = 'W'
+        b = 'b'
+        gamma = 'gamma'
+        beta = 'beta'
+        dropout_param = self.dropout_param
+        L = self.num_layers
+        bn_params = self.bn_params
+        Input = []
+        Input.append(X)
+        out_dict = {}
+        for i in range(L-1):
+            out = []
+            W = 'W'
+            b = 'b'
+            gamma = 'gamma'
+            beta = 'beta'
+            W+=str(i)
+            b+=str(i)
+            gamma+=str(i)
+            beta+=str(i)
+            h1,_ = affine_forward(Input[i],self.params[W],self.params[b])
+            out.append(h1)
+            if self.use_batchnorm:
+                h2,_ = batchnorm_forward(h1,self.params[gamma],self.params[beta],self.bn_params[i])
+                out.append(h2)
+                h3,_ = relu_forward(h2)
+                out.append(h3)
+                if self.use_dropout:
+                    h4,_ = dropout_forward(h3,dropout_param)
+                    out.append(h4)
+                    Input.append(h4)
+                else:
+                    Input.append(h3)
+                             
+            else:
+                h2,_ = relu_forward(h1)
+                out.append(h2)
+                if self.use_dropout:
+                    h3,_ = dropout_forward(h2,dropout_param)
+                    out.append(h3)
+                    Input.append(h3)
+                    
+                else:
+                    Input.append(h2)
+            out_dict[i] = out
+            
+        W = 'W'
+        b = 'b'
+        gamma = 'gamma'
+        beta = 'beta'
+        W+=str(L-1)
+        b+=str(L-1)
+        scores = np.dot(Input[L-1],self.params[W]) + self.params[b]
+            
+        print(out_dict.keys())
+        print(L)
         # If test mode return early
         if mode == 'test':
             return scores
@@ -313,7 +411,24 @@ class FullyConnectedNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        pass
+        
+        data_loss,dscores  = softmax_loss(scores,y)
+        reg_loss = 0
+        for i in range(L):
+            W = 'W'
+            W+=str(i)
+            reg_loss += 0.5*self.reg*np.sum(self.params[W]**2)
+        loss = data_loss + reg_loss
+        
+        
+        for i in range(L-1):
+            out = out_dict[L-2-i]
+            
+            
+            
+        
+        
+        #pass
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
