@@ -452,6 +452,7 @@ def conv_forward_naive(x, w, b, conv_param):
                     q = l*stride
                     out[i,j,k,l]=np.sum(x[i,:,p:HH+p,q:WW+q] * w[j,:,:,:]) + b[j,]
     
+    
 ###########################################################################
     #pass
     ###########################################################################
@@ -498,12 +499,12 @@ def conv_backward_naive(dout, cache):
                 p = k*stride
                 for l in range(W1):
                     q = l*stride
-                    dx[i,:,p:HH+p,q:WW+q] = w[j,:,:,:]*dout[i,j,k,l]
+                    dx[i,:,p:HH+p,q:WW+q] += w[j,:,:,:]*dout[i,j,k,l]
                     dw[j,:,:,:] += x[i,:,p:HH+p,q:WW+q]*dout[i,j,k,l] 
                     db[j] +=dout[i,j,k,l]
                    
-                
-                            
+   
+    dx = dx[:,:,pad:H-pad,pad:W-pad]                       
     #pass
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -647,8 +648,8 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
      
     for i in range(N):
         for j in range(C):
-            out[i,j,:,:],cache1 = batchnorm_forward(x[i,j,:,:],gamma[j],beta[j],bn_param)
-            cache = cache + cache1
+            out[i,j,:,:],cache = batchnorm_forward(x[i,j,:,:],gamma[j],beta[j],bn_param)
+            
             
     
     pass
