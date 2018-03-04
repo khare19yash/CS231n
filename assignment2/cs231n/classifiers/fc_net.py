@@ -336,7 +336,7 @@ class FullyConnectedNet(object):
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
-        
+        print(self.params.keys())
         W = 'W'
         b = 'b'
         gamma = 'gamma'
@@ -347,49 +347,53 @@ class FullyConnectedNet(object):
         Input = []
         Input.append(X)
         out_dict = {}
+        cache = {}
         for i in range(L-1):
             out = []
             W = 'W'
             b = 'b'
             gamma = 'gamma'
             beta = 'beta'
+            cache_affine = 'cache_affine'
+            cache_relu = 'cache_relu'
+            cache_batchnorm = 'cache_batchnorm'
+            cache_dropout = 'cache_dropout'
+            cache_affine+=str(i)
             W+=str(i)
             b+=str(i)
             gamma+=str(i)
             beta+=str(i)
-            h1,_ = affine_forward(Input[i],self.params[W],self.params[b])
-            out.append(h1)
+            h1,cache[cache_affine] = affine_forward(Input[i],self.params[W],self.params[b])
             if self.use_batchnorm:
-                h2,_ = batchnorm_forward(h1,self.params[gamma],self.params[beta],self.bn_params[i])
-                out.append(h2)
-                h3,_ = relu_forward(h2)
-                out.append(h3)
+                cache_batchnorm+=str(i)
+                h2,cache[cache_batchnorm] = batchnorm_forward(h1,self.params[gamma],self.params[beta],self.bn_params[i])
+                cache_relu+=str(i)
+                h3,cache[cache_relu] = relu_forward(h2)
                 if self.use_dropout:
-                    h4,_ = dropout_forward(h3,dropout_param)
-                    out.append(h4)
+                    cache_dropout+=str(i)
+                    h4,cache[cache_dropout] = dropout_forward(h3,dropout_param)
                     Input.append(h4)
                 else:
                     Input.append(h3)
                              
             else:
-                h2,_ = relu_forward(h1)
-                out.append(h2)
+                cache_relu +=str(i)
+                h2,cache[cache_relu] = relu_forward(h1)
                 if self.use_dropout:
-                    h3,_ = dropout_forward(h2,dropout_param)
-                    out.append(h3)
+                    cache_dropout+=str(i)
+                    h3,cache[cache_dropout] = dropout_forward(h2,dropout_param)
                     Input.append(h3)
                     
                 else:
                     Input.append(h2)
-            out_dict[i] = out
             
         W = 'W'
         b = 'b'
-        gamma = 'gamma'
-        beta = 'beta'
         W+=str(L-1)
         b+=str(L-1)
-        scores = np.dot(Input[L-1],self.params[W]) + self.params[b]
+        cache_affine = 'cache_affine'
+        cache_affine+=str(L-1)
+        scores,cache[cache_affine] = affine_forward(Input[L-1],self.params[W],self.params[b])
             
         print(out_dict.keys())
         print(L)
@@ -422,24 +426,93 @@ class FullyConnectedNet(object):
         
         dW = {}
         db = {}
-        dout = {}
+        dgamma = {}
+        dbeta = {}
+
+        
         W = 'W'
+        b = 'b'
+        gamma = 'gamma'
+        beta = 'beta'
+        
+        cache_affine = 'cache_affine'
+        cache_relu = 'cache_relu'
+        cache_batchnorm = 'cache_batchnorm'
+        cache_dropout = 'cache_dropout'
+        
+        cache_affine+=str(L-1)
         W +=str(L-1)
         b +=str(L-1)
-        print(dscores.shape)
-        print(Input[L-1].shape)
-        dW[W] = np.dot(Input[L-1].T,dscores)
-        db[b] = np.sum(dscores,axis=0)
-        dout[L-1] = np.dot(dscores,self.params[W].T)
        
-        for i in range(L-1):
-            out = out_dict[L-2-i]
-            if self.use_batch_norm:
+        dout,dW[W],db[b] = affine_backward(dscores,cache[cache_affine])
+       
+        for i in range(L-2,-1,-1):
+            
+            cache_affine = 'cache_affine'
+            cache_relu = 'cache_relu'
+            cache_batchnorm = 'cache_batchnorm'
+            cache_dropout = 'cache_dropout'
+            
+            W = 'W'
+            b = 'b'
+            gamma = 'gamma'
+            beta = 'beta'
+            
+            
+            if self.use_batchnorm:
                 if self.use_dropout:
-                    mask = np.random.rand(*out[2]) < self.dropout_param['p']
-                    cache = self.dropout_param
-                    dh = dropout_backward(dout[L-1-i],cache)
-                    dh = relu_backward(dh,out[1])
+                    cache_dropout+=str(i)
+                    dh1 = dropout_backward(dout,cache[cache_dropout])
+                    cache_relu+=str(i)
+                    dh2 = relu_backward(dh1,cache[cache_relu])
+                    cache_batchnorm+=str(i)
+                    gamma+=str(i)
+                    beta+=str(i)
+                    dh3,dgamma[gamma],dbeta[beta] = batchnorm_backward(dh2,cache[cache_batchnorm])
+                    W+=str(i)
+                    b+=str(i)
+                    cache_affine+=str(i)
+                    dout,dW[W],db[b] = afifine_backward(dh3,cache[cache_affine])
+                    
+                else:
+                    
+                    cache_relu+=str(i)
+                    dh1 = relu_backward(dout,cache[cache_relu])
+                    cache_batchnorm+=str(i)
+                    gamma+=str(i)
+                    beta+=str(i)
+                    dh2,dgamma[gamma],dbeta[beta] = batchnorm_backward(dh1,cache[cache_batchnorm])
+                    W+=str(i)
+                    b+=str(i)
+                    cache_affine+=str(i)
+                    dout,dW[W],db[b] = afifine_backward(dh2,cache[cache_affine])
+                    
+            else:
+                if self.use_dropout:
+                    cache_dropout+=str(i)
+                    dh1 = dropout_backward(dout,cache[cache_dropout])
+                    cache_relu+=str(i)
+                    dh2 = relu_backward(dh1,cache[cache_relu])
+                    W+=str(i)
+                    b+=str(i)
+                    cache_affine+=str(i)
+                    dout,dW[W],db[b] = afifine_backward(dh2,cache[cache_affine])
+                    
+                    
+                else:
+                    
+                    cache_relu+=str(i)
+                    dh1 = relu_backward(dout,cache[cache_relu])
+                    W+=str(i)
+                    b+=str(i)
+                    cache_affine+=str(i)
+                    dout,dW[W],db[b] = afifine_backward(dh1,cache[cache_affine])
+                    
+                
+                    
+                    
+                    
+                    
                     
             
           
