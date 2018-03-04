@@ -336,7 +336,6 @@ class FullyConnectedNet(object):
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
-        print(self.params.keys())
         W = 'W'
         b = 'b'
         gamma = 'gamma'
@@ -395,8 +394,6 @@ class FullyConnectedNet(object):
         cache_affine+=str(L-1)
         scores,cache[cache_affine] = affine_forward(Input[L-1],self.params[W],self.params[b])
             
-        print(out_dict.keys())
-        print(L)
         # If test mode return early
         if mode == 'test':
             return scores
@@ -506,14 +503,17 @@ class FullyConnectedNet(object):
                     W+=str(i)
                     b+=str(i)
                     cache_affine+=str(i)
-                    dout,dW[W],db[b] = afifine_backward(dh1,cache[cache_affine])
+                    dout,dW[W],db[b] = affine_backward(dh1,cache[cache_affine])
                     
                 
                     
                     
                     
-                    
-                    
+        grads = dW.copy()
+        grads.update(db)
+        grads.update(dgamma)
+        grads.update(dbeta)
+                 
             
           
         
