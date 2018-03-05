@@ -469,7 +469,7 @@ class FullyConnectedNet(object):
                     W+=str(i)
                     b+=str(i)
                     cache_affine+=str(i)
-                    dout,dW[W],db[b] = afifine_backward(dh3,cache[cache_affine])
+                    dout,dW[W],db[b] = affine_backward(dh3,cache[cache_affine])
                     
                 else:
                     
@@ -482,7 +482,7 @@ class FullyConnectedNet(object):
                     W+=str(i)
                     b+=str(i)
                     cache_affine+=str(i)
-                    dout,dW[W],db[b] = afifine_backward(dh2,cache[cache_affine])
+                    dout,dW[W],db[b] = affine_backward(dh2,cache[cache_affine])
                     
             else:
                 if self.use_dropout:
@@ -493,7 +493,7 @@ class FullyConnectedNet(object):
                     W+=str(i)
                     b+=str(i)
                     cache_affine+=str(i)
-                    dout,dW[W],db[b] = afifine_backward(dh2,cache[cache_affine])
+                    dout,dW[W],db[b] = affine_backward(dh2,cache[cache_affine])
                     
                     
                 else:
