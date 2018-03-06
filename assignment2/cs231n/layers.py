@@ -72,7 +72,8 @@ def affine_backward(dout, cache):
     
     dx = np.dot(dout,w.T)
     dw = np.dot(x_reshaped.T,dout)
-    db = np.dot(dout.T,np.ones((N)))
+    #db = np.dot(dout.T,np.ones((N)))
+    db = np.sum(dout,axis=0)
     dx = np.reshape(dx,x.shape)
     
     
@@ -661,12 +662,10 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     
     N,C,H,W = x.shape
     out = np.zeros((N,C,H,W))
-    cache = {}
     
-    for i in range(N):
-        c = 'cache'
-        c+=str(i)
-        out[i,:,:,:],cache[c] = batchnorm_forward(x[i,:,:,:],gamma,beta,bn_param)
+    x = x.transpose(0,3,2,1).reshape(-1,C)
+    dout,cache = batchnorm_forward(x,gamma,beta,bn_param)
+    dout = dout.reshape(N,C,H,W)
             
             
     
