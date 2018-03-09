@@ -206,6 +206,8 @@ def word_embedding_forward(x, W):
     #                                                                            #
     # HINT: This can be done in one line using NumPy's array indexing.           #
     ##############################################################################
+    
+    
     pass
     ##############################################################################
     #                               END OF YOUR CODE                             #
@@ -281,6 +283,23 @@ def lstm_step_forward(x, prev_h, prev_c, Wx, Wh, b):
     # TODO: Implement the forward pass for a single timestep of an LSTM.        #
     # You may want to use the numerically stable sigmoid implementation above.  #
     #############################################################################
+    
+    N , H = prev_h.shape
+    a = np.dot(x,Wx) + np.dot(prev_h,Wh) + b
+    ai = a[:,:H]
+    af = a[:,H:2*H]
+    ao = a[:,2*H:3*H]
+    ag = a[:,3*H:4*H]
+    
+    i = sigmoid(ai)
+    f = sigmoid(af)
+    o = sigmoid(ao)
+    g = np.tanh(ag)
+    
+    next_c = f*prev_c + i*g
+    next_h = o*np.tanh(next_c)
+    
+    cache = i,f,o,g,next_h,next_c,prev_h,prev_c,x,Wx,Wh,b
     pass
     ##############################################################################
     #                               END OF YOUR CODE                             #
@@ -313,6 +332,37 @@ def lstm_step_backward(dnext_h, dnext_c, cache):
     # HINT: For sigmoid and tanh you can compute local derivatives in terms of  #
     # the output value from the nonlinearity.                                   #
     #############################################################################
+    
+    N,H = dnext_h.shape
+    
+    
+    i,f,o,g,next_h,next_c,prev_h,prev_c,x,Wx,Wh,b = cache
+    do = dnext_h * np.tanh(next_c)
+    dnext_c1 = o*(1 - (np.tanh(next_c)**2))*dnext_h
+    dnext_c += dnext_c1
+    dprev_c = f*dnext_c
+    df = prev_c*dnext_c
+    di = g*dnext_c
+    dg = i*dnext_c
+    
+    dai = i*(1-i)*di
+    daf = f*(1-f)*df
+    dao = o*(1-o)*do
+    dag = (1 - g**2) * dg
+    
+    da = np.zeros((N,4*H))
+    
+    da[:,:H] = dai
+    da[:,H:2*H] = daf
+    da[:,2*H:3*H] = dao
+    da[:,3*H:4*H] = dag
+    
+    dx = np.dot(da,Wx.T) 
+    dWx = np.dot(x.T,da)
+    dprev_h = np.dot(da,Wh.T)
+    dWh = np.dot(prev_h.T,da)
+    db = np.sum(da,axis=0)
+
     pass
     ##############################################################################
     #                               END OF YOUR CODE                             #
