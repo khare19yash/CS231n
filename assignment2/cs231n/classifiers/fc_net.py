@@ -251,20 +251,19 @@ class FullyConnectedNet(object):
             b1 = np.zeros((1,dim_list[i+1]))
             b+=str(i)
             self.params[b] = b1
-            gamma1 = np.ones(dim_list[i+1])
-            gamma+=str(i)
-            self.params[gamma] = gamma1
-            beta1 = np.zeros(dim_list[i+1])
-            beta+=str(i)
-            self.params[beta] = beta1     
+            if self.use_batchnorm:
+                gamma1 = np.ones(dim_list[i+1])
+                gamma+=str(i)
+                self.params[gamma] = gamma1
+                beta1 = np.zeros(dim_list[i+1])
+                beta+=str(i)
+                self.params[beta] = beta1     
+                gamma = 'gamma'
+                beta = 'beta'
+                pass
             W = 'W'
             b = 'b'
-            gamma = 'gamma'
-            beta = 'beta'
-            
-            
-        W = 'W'
-        b = 'b'
+        
         
         w = weight_scale*np.random.randn(dim_list[i+1],num_classes)
         W+=str(2)
@@ -441,6 +440,8 @@ class FullyConnectedNet(object):
         W +=str(L-1)
         b +=str(L-1)
        
+    
+    
         dout,dW[W],db[b] = affine_backward(dscores,cache[cache_affine])
        
         for i in range(L-2,-1,-1):
