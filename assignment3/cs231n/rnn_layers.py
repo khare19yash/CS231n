@@ -206,9 +206,14 @@ def word_embedding_forward(x, W):
     #                                                                            #
     # HINT: This can be done in one line using NumPy's array indexing.           #
     ##############################################################################
-    
+    N,T = x.shape
+    D = W.shape[1]
+    out = np.zeros((N,T,D))
+    for i in range(N):
+        out[i,:,:] = W[x[i,:],:] 
     
     pass
+    cache = x,W
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -237,6 +242,13 @@ def word_embedding_backward(dout, cache):
     # Note that Words can appear more than once in a sequence.                   #
     # HINT: Look up the function np.add.at                                       #
     ##############################################################################
+    x,W = cache
+    V,D = W.shape
+    dW = np.zeros((V,D))
+    N,T = x.shape
+    
+    for i in range(N):
+        dW[] = np.add.at(dW,x[i,:],dout[i,:,:])
     pass
     ##############################################################################
     #                               END OF YOUR CODE                             #
