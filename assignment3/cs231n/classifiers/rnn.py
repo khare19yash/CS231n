@@ -161,6 +161,10 @@ class CaptioningRNN(object):
         dfeatures = np.dot(dh0,W_proj.T)
         
         
+        grads['W_vocab'],grads['b_vocab'] = dW_vocab,db_vocab
+        grads['Wx'],d['Wh'],d['b'] = dWx,dWh,db
+        grads['W_proj'],grads['b_proj'],d['W_embed'] = dW_proj,db_proj,dW_embed
+        
         pass
         ############################################################################
         #                             END OF YOUR CODE                             #

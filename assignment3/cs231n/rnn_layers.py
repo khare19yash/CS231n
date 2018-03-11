@@ -413,12 +413,11 @@ def lstm_forward(x, h0, Wx, Wh, b):
     
     N,T,D = x.shape
     H = Wh.shape[0]
-    prev_c = np.zeros((N,H))
     next_c = np.zeros((N,H))
     
     h = np.zeros((N,T,H))
     cache = []
-    h[:,0,:],next_c,cache1 = lstm_step_forward(x[:,0,:],h0,prev_c,Wx,Wh,b)
+    h[:,0,:],next_c,cache1 = lstm_step_forward(x[:,0,:],h0,next_c,Wx,Wh,b)
     cache.append(cache1)
     
     for i in range(1,T):
