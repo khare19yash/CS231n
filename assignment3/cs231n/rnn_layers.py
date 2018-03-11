@@ -248,7 +248,7 @@ def word_embedding_backward(dout, cache):
     N,T = x.shape
     
     for i in range(N):
-        dW[] = np.add.at(dW,x[i,:],dout[i,:,:])
+        dW[x[i,:],:] += dout[i,:,:]
     pass
     ##############################################################################
     #                               END OF YOUR CODE                             #
