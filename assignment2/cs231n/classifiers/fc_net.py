@@ -97,8 +97,12 @@ class TwoLayerNet(object):
         b1 = self.params['b1']
         b2 = self.params['b2']
         
-     
-        
+        D=1
+        N = X.shape[0]
+        for i in range(1,len(X.shape)):
+            D *= X.shape[i]
+    
+        X = np.reshape(X,[N,D])
         hidden_layer = np.maximum(0,np.dot(X,W1)+b1)
         scores = np.dot(hidden_layer,W2) + b2
         #scores = np.exp(y_)
