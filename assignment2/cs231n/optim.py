@@ -106,7 +106,7 @@ def rmsprop(x, dx, config=None):
     ###########################################################################
     
     config['cache'] = config['decay_rate']*config['cache'] + (1-config['decay_rate']) * dx**2
-    next_x = x -config['learning_rate'] * dx / (np.sqrt(config['cache']) + config['epsilon'])
+    next_x = x -config['learning_rate'] * dx / (np.sqrt(config['cache'] + config['epsilon']))
     #pass
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -144,17 +144,18 @@ def adam(x, dx, config=None):
     # the next_x variable. Don't forget to update the m, v, and t variables   #
     # stored in config.                                                       #
     ###########################################################################
+    
+    config['t'] += 1
     t = config['t']
+    
     config['m'] = config['beta1']*config['m'] + (1-config['beta1'])*dx
     mt = config['m'] / (1 - config['beta1']**t)
     config['v'] = config['v']*config['beta2'] + (1 - config['beta2']) * (dx**2)
     vt = config['m'] / (1 - config['beta2']**t)
-    next_x = x - config['learning_rate'] * mt / (np.sqrt(vt) + config['epsilon'])
+    next_x =  x - config['learning_rate'] * mt / (np.sqrt(vt + config['epsilon']))
     
-    config['t'] = t+1
      
-    
-    
+
     pass
     ###########################################################################
     #                             END OF YOUR CODE                            #
