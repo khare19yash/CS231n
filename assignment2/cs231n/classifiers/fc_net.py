@@ -266,13 +266,13 @@ class FullyConnectedNet(object):
         
         
         w = weight_scale*np.random.randn(dim_list[i+1],num_classes)
-        W+=str(2)
+        W+=str(i+1)
         self.params[W] = w
         b1 = np.zeros((1,num_classes))
-        b+=str(2)
+        b+=str(i+1)
         self.params[b] = b1
         
-            
+       
         #pass
         ############################################################################
         #                             END OF YOUR CODE                             #
