@@ -147,12 +147,15 @@ def adam(x, dx, config=None):
     
     config['t'] += 1
     t = config['t']
+    lrt = config['learning_rate'] * np.sqrt(1 - config['beta2']**t) / (1 - config['beta1']**t)
     
     config['m'] = config['beta1']*config['m'] + (1-config['beta1'])*dx
-    mt = config['m'] / (1 - config['beta1']**t)
+    mt = config['m'] 
+    #/ (1 - config['beta1']**t)
     config['v'] = config['v']*config['beta2'] + (1 - config['beta2']) * (dx**2)
-    vt = config['m'] / (1 - config['beta2']**t)
-    next_x =  x - config['learning_rate'] * mt / (np.sqrt(vt + config['epsilon']))
+    vt = config['m'] 
+    #/ (1 - config['beta2']**t)
+    next_x =  x - lrt * mt / (np.sqrt(vt) + config['epsilon'])
     
      
 
