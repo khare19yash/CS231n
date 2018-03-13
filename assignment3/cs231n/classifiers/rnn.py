@@ -156,14 +156,14 @@ class CaptioningRNN(object):
         else:
             dx,dh0,dWx,dWh,db = lstm_backward(dh,cache_lstm)
         dW_embed = word_embedding_backward(dx,cache_embed)
-        dWproj = np.dot(features.T,dh0)
+        dW_proj = np.dot(features.T,dh0)
         db_proj = np.sum(dh0,axis=0)
         dfeatures = np.dot(dh0,W_proj.T)
         
         
         grads['W_vocab'],grads['b_vocab'] = dW_vocab,db_vocab
-        grads['Wx'],d['Wh'],d['b'] = dWx,dWh,db
-        grads['W_proj'],grads['b_proj'],d['W_embed'] = dW_proj,db_proj,dW_embed
+        grads['Wx'],grads['Wh'],grads['b'] = dWx,dWh,db
+        grads['W_proj'],grads['b_proj'],grads['W_embed'] = dW_proj,db_proj,dW_embed
         
         pass
         ############################################################################
@@ -227,6 +227,29 @@ class CaptioningRNN(object):
         # functions; you'll need to call rnn_step_forward or lstm_step_forward in #
         # a loop.                                                                 #
         ###########################################################################
+        
+        cache_rnn = []
+        cache_lstm = []
+        cache_embed = []
+        cache_affine = []
+        
+        next_h = np.dot(features,W_proj) + b_proj
+        x,cache_embed[0] = word_embedding_forward(self._start,W_embed)
+        
+        for i in range(max_length):
+            if self.cell_type == 'rnn':
+                next_h,cache_rnn[i] = rnn_step_forward(x,next_h,Wx,Wh,b)
+            else:
+                next_h ,cache_lstm[i] = lstm_step_forward(x,next_h,Wx,Wh,b)
+            
+                
+                
+                
+            
+          
+            
+            
+        
         pass
         ############################################################################
         #                             END OF YOUR CODE                             #
