@@ -421,8 +421,9 @@ class FullyConnectedNet(object):
         for i in range(L):
             W = 'W'
             W+=str(i)
-            reg_loss += 0.5*self.reg*np.sum(self.params[W]**2)
+            reg_loss += 0.5*self.reg*np.sum(self.params[W]*self.params[W])
         loss = data_loss + reg_loss
+        
         
         dW = {}
         db = {}
@@ -447,6 +448,7 @@ class FullyConnectedNet(object):
     
     
         dout,dW[W],db[b] = affine_backward(dscores,cache[cache_affine])
+        dW[W] += self.reg * self.params[W]
        
         for i in range(L-2,-1,-1):
             
@@ -475,6 +477,7 @@ class FullyConnectedNet(object):
                     b+=str(i)
                     cache_affine+=str(i)
                     dout,dW[W],db[b] = affine_backward(dh3,cache[cache_affine])
+                    dW[W] += self.reg * self.params[W]
                     
                 else:
                     
@@ -488,6 +491,7 @@ class FullyConnectedNet(object):
                     b+=str(i)
                     cache_affine+=str(i)
                     dout,dW[W],db[b] = affine_backward(dh2,cache[cache_affine])
+                    dW[W] += self.reg * self.params[W]
                     
             else:
                 if self.use_dropout:
@@ -499,6 +503,7 @@ class FullyConnectedNet(object):
                     b+=str(i)
                     cache_affine+=str(i)
                     dout,dW[W],db[b] = affine_backward(dh2,cache[cache_affine])
+                    dW[W] += self.reg * self.params[W]
                     
                     
                 else:
@@ -509,6 +514,7 @@ class FullyConnectedNet(object):
                     b+=str(i)
                     cache_affine+=str(i)
                     dout,dW[W],db[b] = affine_backward(dh1,cache[cache_affine])
+                    dW[W] += self.reg * self.params[W]
                     
                 
                     
