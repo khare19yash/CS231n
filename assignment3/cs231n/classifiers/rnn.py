@@ -228,28 +228,28 @@ class CaptioningRNN(object):
         # a loop.                                                                 #
         ###########################################################################
         
-        cache_rnn = []
-        cache_lstm = []
-        cache_embed = []
-        cache_affine = []
         
         next_h = np.dot(features,W_proj) + b_proj
-        x,cache_embed[0] = word_embedding_forward(self._start,W_embed)
+        next_c = np.zeros_like(next_h)
+        x = np.zeros((N,256))
+        y,cache = word_embedding_forward(self._start,W_embed)
         
+        for i in range(N):
+            x[i,:] = y
+           
         for i in range(max_length):
             if self.cell_type == 'rnn':
-                next_h,cache_rnn[i] = rnn_step_forward(x,next_h,Wx,Wh,b)
+                next_h,cache = rnn_step_forward(x,next_h,Wx,Wh,b)
+                pass
             else:
-                next_h ,cache_lstm[i] = lstm_step_forward(x,next_h,Wx,Wh,b)
+                next_h,next_c,cache = lstm_step_forward(x,next_h,next_c,Wx,Wh,b)
+                pass
+            out= np.dot(next_h,W_vocab) + b_vocab
+            out = np.argmax(out,axis=1)
+            captions[:,i] = out
+            x,cache = word_embedding_forward(out,W_embed)
             
-                
-                
-                
-            
-          
-            
-            
-        
+
         pass
         ############################################################################
         #                             END OF YOUR CODE                             #
