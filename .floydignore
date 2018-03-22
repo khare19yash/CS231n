@@ -1,5 +1,5 @@
 
-# Directories and files to ignore when uploading code to floyd
+# directories and files to ignore when uploading code to floyd
 
 .git
 .eggs
