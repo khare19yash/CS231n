@@ -148,25 +148,41 @@ class CaptioningRNN(object):
         loss,dout = temporal_softmax_loss(out,captions_out,mask)
         '''
         
+        #forward pass
+        N,D = features.shape
+        H = W_proj.shape[1]
+        V = W_vocab.shape[1]
+        next_h = np.zeros((4,N,H))
+        next_c = np.zeros((4,N,H))
+        out = np.zeros((4,N,V))
+        feed = {}
         
         prev_h = np.dot(features,W_proj) + b_proj
         x,cache_embed = word_embedding_forward(captions_in,W_embed)
         print(x.shape)
         for i range(max_length):
+            cache = []
             for d in range(4):
-                inputs = x[:,i,:] if d==0 else out[d-1]
-                next_h,next_c,cache = lstm_step_forward(inputs,prev_h,prev_c,Wx,Wh,b)
-                prev_h = next_h
-                prev_c = next_c
-                out[i,:,:] = np.dot(next_h,W_vocab) + b_vocab
+                inputs = x[:,i,:] if d==0 else out[d-1,:,:]
+                if i==0:
+                    next_h[d,:,:],next_c[d,:,:],c = lstm_step_forward(inputs,prev_h,prev_c,Wx,Wh,b)
+                    cache.append(c)
+                else:
+                    next_h[d,:,:],next_c[d,:,:],c = lstm_step_forward(inputs,next_h[d,:,:],next_c[d,:,:],Wx,Wh,b)
+                    cache.append(c)
+                out[d,:,:],c = affine_forward(next_h[d,:,:],W_vocab,b_vocab)
+                cache.append(c)
+            feed[i] = cache
                 
+        
+        
+
                 
+            
         
         
         
-        
-        
-        
+        '''
         #backward pass
         dh,dW_vocab,db_vocab = temporal_affine_backward(dout,cache_affine)
         if self.cell_type == 'rnn':
@@ -177,7 +193,7 @@ class CaptioningRNN(object):
         dW_proj = np.dot(features.T,dh0)
         db_proj = np.sum(dh0,axis=0)
         dfeatures = np.dot(dh0,W_proj.T)
-        
+        '''
         
         grads['W_vocab'],grads['b_vocab'] = dW_vocab,db_vocab
         grads['Wx'],grads['Wh'],grads['b'] = dWx,dWh,db
