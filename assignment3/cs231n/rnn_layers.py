@@ -211,6 +211,7 @@ def word_embedding_forward(x, W):
    # out = np.zeros((N,T,D))
    # for i in range(N):
     #    out[i,:,:] = W[x[i,:],:] 
+    
     out = W[x,:]
     
     pass
@@ -503,9 +504,12 @@ def temporal_affine_forward(x, w, b):
     - out: Output data of shape (N, T, M)
     - cache: Values needed for the backward pass
     """
+    
     N, T, D = x.shape
     M = b.shape[0]
-    out = x.reshape(N * T, D).dot(w).reshape(N, T, M) + b
+    
+    out = x.reshape(N * T, D).dot(w) + b
+    out = out.reshape(N,T,M)
     cache = x, w, b, out
     return out, cache
 
